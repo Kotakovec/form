@@ -29,6 +29,7 @@
         #loader-logo { 
             max-width: 150px; height: auto; 
             margin-top: auto; margin-bottom: auto; 
+            transition: filter 0.5s ease-in-out; /* Plynulý přechod do červené */
         }
 
         #loader-text { 
@@ -46,11 +47,17 @@
             box-shadow: 0 0 10px #00c853; transition: width 0.15s ease-out; 
         }
 
-        /* Třída pro červený bar při údržbě nebo chybě */
+        /* --- STYLY PRO CHYBU NEBO ÚDRŽBU --- */
+        
+        /* Červené logo */
+        .logo-error {
+            filter: drop-shadow(0 0 15px #ff4444) hue-rotate(240deg) !important;
+        }
+
+        /* Červený progress bar */
         .bar-error {
             background: #ff4444 !important;
             box-shadow: 0 0 15px #ff4444 !important;
-            transition: background 0.3s ease-in-out !important;
         }
 
         .container { 
@@ -101,6 +108,7 @@
     <script>
         const progressBar = document.getElementById('progress-bar');
         const loaderText = document.getElementById('loader-text');
+        const loaderLogo = document.getElementById('loader-logo'); // Nový element pro logo
 
         function simulateLoading(target, textPrefix = "KotakEngine - Načítání") {
             return new Promise((resolve) => {
@@ -120,29 +128,33 @@
 
         async function init() {
             try {
-                // 1. Zahájení načítání
                 await simulateLoading(20);
 
-                // 2. Fetch dat z JSONu
                 const response = await fetch('data.json?t=' + Date.now());
                 if (!response.ok) throw new Error();
                 const data = await response.json();
 
-                // 3. Kontrola režimu údržby (Maintenance)
+                // 1. KONTROLA ÚDRŽBY (MAINTENANCE)
                 if (data.settings.maintenance) {
-                    await simulateLoading(100, "Prověřování systému"); // Dojede až do konce
+                    await simulateLoading(100, "Prověřování"); 
                     setTimeout(() => {
+                        // ČERVENÉ LOGO
+                        loaderLogo.classList.add('logo-error');
+                        
+                        // ČERVENÝ BAR
                         progressBar.classList.add('bar-error');
-                        loaderText.innerText = "MAINTENANCE MODE - SYSTÉM DOČASNĚ ODPOJEN";
+                        
+                        // JEDNODUCHÝ TEXT
+                        loaderText.innerText = "MAINTENANCE MODE";
                         loaderText.style.color = "#ff4444";
+                        loaderText.style.textShadow = "0 0 10px #ff4444";
                     }, 200);
                     return; 
                 }
 
-                // 4. Dojetí do 100 % pokud je vše v pořádku
                 await simulateLoading(100);
 
-                // 5. Vykreslení obsahu
+                // Zobrazení webu (pokud maintenance: false)
                 if (data.settings.showText && data.content.title.trim() !== "") {
                     document.getElementById('text-section').style.display = 'block';
                     document.getElementById('table-title').innerText = data.content.title;
@@ -173,15 +185,15 @@
                     });
                 }
 
-                // Zobrazení webu
                 document.getElementById('loader-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'flex';
 
             } catch (e) {
                 // Pokud selže fetch (chyba v JSONu)
                 progressBar.style.width = '100%';
+                loaderLogo.classList.add('logo-error'); // Taky zčervenáme logo
                 progressBar.classList.add('bar-error');
-                loaderText.innerText = "KRITICKÁ CHYBA KONFIGURACE";
+                loaderText.innerText = "KRITICKÁ CHYBA SYSTÉMU";
                 loaderText.style.color = "#ff4444";
             }
         }
