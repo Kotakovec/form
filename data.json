@@ -23,11 +23,11 @@
       ["Olšovský", "0", "NE", "NE"],
       ["Repa", "0", "NE", "NE"],
       ["Saic", "0", "NE", "NE"],
-      ["Stejskal", "0", "NE"],
-      ["Svoboda", "0", "NE"],
-      ["Šedrla", "0", "NE"],
-      ["Všetička", "0", "NE"],
-      ["Yakovcenko", "0", "NE"]
+      ["Stejskal", "0", "NE" ,"NE"],
+      ["Svoboda", "0", "NE", "NE"],
+      ["Šedrla", "0", "NE", "NE"],
+      ["Všetička", "0", "NE", "NE"],
+      ["Yakovcenko", "0", "NE", "NE"]
     ]
   }
 }
