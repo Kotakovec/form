@@ -14,7 +14,7 @@
             padding: 0;
             height: 100vh; 
             width: 100vw;
-            overflow: hidden; /* Zákaz scrollování */
+            overflow: hidden; 
             display: flex;
             flex-direction: column;
             align-items: center; 
@@ -23,63 +23,35 @@
 
         /* Načítací obrazovka (Overlay) */
         #loader-overlay {
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%;
-            background: #0a0a0a; 
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            z-index: 1000;
-            padding: 40px 0;
-            box-sizing: border-box;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0a0a0a; display: flex; flex-direction: column;
+            align-items: center; z-index: 1000; padding: 40px 0; box-sizing: border-box;
         }
 
-        /* Logo je ve svislém středu */
         #loader-logo { 
-            max-width: 180px; 
-            height: auto; 
-            margin-top: auto;   /* Odtlačí logo od horního okraje */
-            margin-bottom: auto; /* Odtlačí text a bar k dolnímu okraji */
+            max-width: 180px; height: auto; 
+            margin-top: auto; margin-bottom: auto; 
         }
 
-        /* Text a Progress Bar dole */
         #loader-text { 
-            font-size: 1.1rem; 
-            color: #00c853; 
-            margin-bottom: 15px; 
-            text-shadow: 0 0 5px #00c853; 
-            text-align: center;
+            font-size: 1.1rem; color: #00c853; margin-bottom: 15px; 
+            text-shadow: 0 0 5px #00c853; text-align: center;
         }
 
         .progress-container { 
-            width: 280px; 
-            height: 8px; 
-            background: #1a1a1a; 
-            border-radius: 10px; 
-            overflow: hidden; 
-            border: 1px solid #333;
-            margin-bottom: 20px; /* Mezera od spodní hrany */
+            width: 280px; height: 8px; background: #1a1a1a; 
+            border-radius: 10px; overflow: hidden; border: 1px solid #333; margin-bottom: 20px;
         }
 
         #progress-bar { 
-            height: 100%; 
-            width: 0%; 
-            background: #00c853; 
-            box-shadow: 0 0 10px #00c853; 
-            transition: width 0.15s ease-out; 
+            height: 100%; width: 0%; background: #00c853; 
+            box-shadow: 0 0 10px #00c853; transition: width 0.15s ease-out; 
         }
 
-        /* Hlavní kontejner s obsahem (po načtení) */
+        /* Hlavní kontejner s obsahem */
         .container { 
-            width: 90%; 
-            max-width: 900px; 
-            display: none; /* Skryto během načítání */
-            flex-direction: column; 
-            align-items: center;
-            text-align: center;
+            width: 90%; max-width: 900px; display: none; 
+            flex-direction: column; align-items: center; text-align: center;
         }
 
         #text-section { margin-bottom: 30px; }
@@ -91,6 +63,18 @@
         th, td { border: 1px solid #333; padding: 12px; text-align: center; }
         th { background: #00c853; color: black; }
         tr:nth-child(even) { background: #161616; }
+
+        /* --- Styly pro ANO / NE --- */
+        .status-ano { 
+            color: #00ff00; /* Jasně zelená */
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+        }
+        .status-ne { 
+            color: #ff4444; /* Jasně červená */
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(255, 68, 68, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -98,9 +82,7 @@
     <div id="loader-overlay">
         <img src="logo.png" alt="KotakEngine Logo" id="loader-logo">
         <div id="loader-text">KotakEngine - Načítání z databáze [0]%</div>
-        <div class="progress-container">
-            <div id="progress-bar"></div>
-        </div>
+        <div class="progress-container"><div id="progress-bar"></div></div>
     </div>
 
     <div class="container" id="main-content">
@@ -118,32 +100,23 @@
     </div>
 
     <script>
-        // Funkce pro efekt progress baru (cca 1s)
         function simulateLoading() {
             return new Promise((resolve) => {
                 const progressBar = document.getElementById('progress-bar');
                 const loaderText = document.getElementById('loader-text');
                 let progress = 0;
-
                 const interval = setInterval(() => {
                     progress += Math.floor(Math.random() * 15) + 10;
                     if (progress > 100) progress = 100;
-
                     progressBar.style.width = progress + '%';
                     loaderText.innerText = `KotakEngine - Načítání z databáze [${progress}]%`;
-
-                    if (progress === 100) {
-                        clearInterval(interval);
-                        setTimeout(resolve, 300);
-                    }
+                    if (progress === 100) { clearInterval(interval); setTimeout(resolve, 300); }
                 }, 120);
             });
         }
 
-        // Hlavní logika načítání dat
         async function init() {
             try {
-                // Spustíme simulaci a fetch dat zároveň
                 const [response] = await Promise.all([
                     fetch('data.json?t=' + Date.now()),
                     simulateLoading()
@@ -152,7 +125,6 @@
                 if (!response.ok) throw new Error();
                 const data = await response.json();
 
-                // 1. Nastavení textu
                 if (data.settings.showText) {
                     document.getElementById('table-title').innerText = data.content.title;
                     document.getElementById('table-desc').innerText = data.content.description;
@@ -160,7 +132,6 @@
                     document.getElementById('text-section').style.display = 'none';
                 }
 
-                // 2. Nastavení tabulky
                 if (data.settings.showTable) {
                     const head = document.getElementById('table-head');
                     data.table.columns.forEach(c => {
@@ -172,9 +143,18 @@
                     const body = document.getElementById('table-body');
                     data.table.rows.forEach(r => {
                         const tr = document.createElement('tr');
-                        r.forEach(cell => {
+                        r.forEach(cellText => {
                             const td = document.createElement('td');
-                            td.innerText = cell;
+                            td.innerText = cellText;
+
+                            // LOGIKA PRO BARVY (ANO / NE)
+                            const cleanText = cellText.toString().trim().toUpperCase();
+                            if (cleanText === "ANO") {
+                                td.classList.add('status-ano');
+                            } else if (cleanText === "NE") {
+                                td.classList.add('status-ne');
+                            }
+
                             tr.appendChild(td);
                         });
                         body.appendChild(tr);
@@ -183,13 +163,8 @@
                     document.getElementById('table-section').style.display = 'none';
                 }
 
-                // Přepnutí obrazovek
                 document.getElementById('loader-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'flex';
-                
-                // Pokud chceš po načtení povolit scroll (kdyby byla tabulka dlouhá), 
-                // odkomentuj řádek níže:
-                // document.body.style.overflow = 'auto';
 
             } catch (e) {
                 document.getElementById('loader-text').innerText = "KRITICKÁ CHYBA DATABÁZE";
