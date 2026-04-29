@@ -1,11 +1,11 @@
 {
   "settings": {
     "showText": true,
-    "showTable": true
+    "showTable": false
   },
   "content": {
-    "title": "KotakEngine",
-    "description": "Evidence stavu projektů a splněných úkolů."
+    "title": "1",
+    "description": "1"
   },
   "table": {
     "columns": ["Jména", "Vybráno", "Splněno", "Bank. Převod"],
