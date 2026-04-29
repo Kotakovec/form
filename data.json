@@ -1,7 +1,8 @@
 {
   "settings": {
     "showText": true,
-    "showTable": false
+    "showTable": false,
+    "maintenance": true
   },
   "content": {
     "title": "1",
