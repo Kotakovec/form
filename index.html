@@ -46,54 +46,30 @@
             box-shadow: 0 0 10px #00c853; transition: width 0.15s ease-out; 
         }
 
+        /* Třída pro červený bar při údržbě nebo chybě */
+        .bar-error {
+            background: #ff4444 !important;
+            box-shadow: 0 0 10px #ff4444 !important;
+        }
+
         .container { 
-            width: 95%; 
-            max-width: 500px; 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            text-align: center;
+            width: 95%; max-width: 500px; display: none; 
+            flex-direction: column; align-items: center; text-align: center;
             padding: 10px 0;
         }
 
         #text-section { margin-bottom: 10px; width: 100%; }
-        
-        /* Odstraněna čára (border-bottom) a upraven styl nadpisu */
-        h1 { 
-            color: #00c853; 
-            display: inline-block; 
-            font-size: 1.4rem; 
-            margin: 10px 0; 
-            border: none; /* Explicitně zrušena čára */
-        }
-        
+        h1 { color: #00c853; display: inline-block; font-size: 1.4rem; margin: 10px 0; border: none; }
         #table-desc { color: #888; margin-top: 5px; font-size: 0.85rem; }
 
         #table-section { 
-            width: 100%; 
-            max-height: 75vh; 
-            overflow-y: auto; 
-            border: 1px solid #333;
-            border-radius: 4px;
+            width: 100%; max-height: 75vh; overflow-y: auto; 
+            border: 1px solid #333; border-radius: 4px;
         }
         
         table { width: 100%; border-collapse: collapse; background: #111; }
-        
-        th, td { 
-            border: 1px solid #222; 
-            padding: 6px 8px; 
-            text-align: center; 
-            font-size: 0.85rem; 
-        }
-
-        th { 
-            background: #00c853; 
-            color: black; 
-            font-size: 0.8rem; 
-            position: sticky; top: 0; 
-            z-index: 10;
-        }
-
+        th, td { border: 1px solid #222; padding: 6px 8px; text-align: center; font-size: 0.85rem; }
+        th { background: #00c853; color: black; font-size: 0.8rem; position: sticky; top: 0; z-index: 10; }
         tr:nth-child(even) { background: #161616; }
         
         .status-ano { color: #00ff00; font-weight: bold; }
@@ -104,16 +80,17 @@
 
     <div id="loader-overlay">
         <img src="logo.png" alt="Logo" id="loader-logo">
-        <div id="loader-text">KotakEngine - Načítání [0]%</div>
+        <div id="loader-text">KotakEngine - Inicializace [0]%</div>
         <div class="progress-container"><div id="progress-bar"></div></div>
     </div>
 
     <div class="container" id="main-content">
-        <div id="text-section" style="display: none;"> <h1 id="table-title"></h1>
+        <div id="text-section" style="display: none;">
+            <h1 id="table-title"></h1>
             <p id="table-desc"></p>
         </div>
-
-        <div id="table-section" style="display: none;"> <table id="data-table">
+        <div id="table-section" style="display: none;">
+            <table id="data-table">
                 <thead><tr id="table-head"></tr></thead>
                 <tbody id="table-body"></tbody>
             </table>
@@ -121,39 +98,54 @@
     </div>
 
     <script>
-        function simulateLoading() {
+        const progressBar = document.getElementById('progress-bar');
+        const loaderText = document.getElementById('loader-text');
+
+        function simulateLoading(target) {
             return new Promise((resolve) => {
-                const progressBar = document.getElementById('progress-bar');
-                const loaderText = document.getElementById('loader-text');
                 let progress = 0;
                 const interval = setInterval(() => {
-                    progress += Math.floor(Math.random() * 20) + 10;
-                    if (progress > 100) progress = 100;
+                    progress += Math.floor(Math.random() * 15) + 5;
+                    if (progress >= target) {
+                        progress = target;
+                        clearInterval(interval);
+                        resolve();
+                    }
                     progressBar.style.width = progress + '%';
                     loaderText.innerText = `KotakEngine - Načítání [${progress}]%`;
-                    if (progress === 100) { clearInterval(interval); setTimeout(resolve, 200); }
-                }, 100);
+                }, 80);
             });
         }
 
         async function init() {
             try {
-                const [response] = await Promise.all([
-                    fetch('data.json?t=' + Date.now()),
-                    simulateLoading()
-                ]);
+                // 1. Nejdřív jen lehce načteme progress
+                await simulateLoading(30);
 
+                // 2. Fetch dat
+                const response = await fetch('data.json?t=' + Date.now());
                 if (!response.ok) throw new Error();
                 const data = await response.json();
 
-                // Kontrola textu - pokud je zapnutý a není prázdný
+                // 3. KONTROLA MAINTENANCE
+                if (data.settings.maintenance) {
+                    await simulateLoading(65); // Zastavíme to v půlce
+                    progressBar.classList.add('bar-error');
+                    loaderText.innerText = "MAINTENANCE MODE - DOČASNĚ VYPNUTO";
+                    loaderText.style.color = "#ff4444";
+                    return; // Ukončíme funkci, aby se web nenačetl
+                }
+
+                // 4. Dojetí loading baru pokud není maintenance
+                await simulateLoading(100);
+
+                // 5. Vykreslení dat (pokud maintenance: false)
                 if (data.settings.showText && data.content.title.trim() !== "") {
                     document.getElementById('text-section').style.display = 'block';
                     document.getElementById('table-title').innerText = data.content.title;
                     document.getElementById('table-desc').innerText = data.content.description;
                 }
 
-                // Kontrola tabulky
                 if (data.settings.showTable) {
                     document.getElementById('table-section').style.display = 'block';
                     const head = document.getElementById('table-head');
@@ -182,8 +174,9 @@
                 document.getElementById('main-content').style.display = 'flex';
 
             } catch (e) {
-                document.getElementById('loader-text').innerText = "CHYBA DATA.JSON";
-                document.getElementById('loader-text').style.color = "#ff4444";
+                progressBar.classList.add('bar-error');
+                loaderText.innerText = "KRITICKÁ CHYBA DATABÁZE";
+                loaderText.style.color = "#ff4444";
             }
         }
         window.onload = init;
