@@ -29,7 +29,7 @@
         #loader-logo { 
             max-width: 150px; height: auto; 
             margin-top: auto; margin-bottom: auto; 
-            transition: filter 0.5s ease-in-out; /* Plynulý přechod do červené */
+            /* transition ODSTRANĚNA pro okamžitou změnu */
         }
 
         #loader-text { 
@@ -44,21 +44,22 @@
 
         #progress-bar { 
             height: 100%; width: 0%; background: #00c853; 
-            box-shadow: 0 0 10px #00c853; transition: width 0.15s ease-out; 
+            box-shadow: 0 0 10px #00c853; 
+            transition: width 0.15s ease-out; /* Ponecháme jen pro plynulý růst baru */
         }
 
-        /* --- STYLY PRO CHYBU NEBO ÚDRŽBU --- */
+        /* --- STYLY PRO CHYBU NEBO ÚDRŽBU (Instantní) --- */
         
-        /* Červené logo */
-.logo-error {
-    filter: brightness(0.5) sepia(1) saturate(10000%) hue-rotate(320deg) drop-shadow(0 0 15px #ff4444) !important;
-}
+        /* Okamžité červené logo bez přechodů */
+        .logo-error {
+            filter: grayscale(1) brightness(0.7) sepia(1) saturate(5000%) hue-rotate(330deg) drop-shadow(0 0 15px #ff4444) !important;
+        }
 
-
-        /* Červený progress bar */
+        /* Okamžitý červený progress bar */
         .bar-error {
             background: #ff4444 !important;
             box-shadow: 0 0 15px #ff4444 !important;
+            transition: none !important; /* Zrušíme plynulou změnu barvy */
         }
 
         .container { 
@@ -109,7 +110,7 @@
     <script>
         const progressBar = document.getElementById('progress-bar');
         const loaderText = document.getElementById('loader-text');
-        const loaderLogo = document.getElementById('loader-logo'); // Nový element pro logo
+        const loaderLogo = document.getElementById('loader-logo'); 
 
         function simulateLoading(target, textPrefix = "KotakEngine - Načítání") {
             return new Promise((resolve) => {
@@ -137,19 +138,19 @@
 
                 // 1. KONTROLA ÚDRŽBY (MAINTENANCE)
                 if (data.settings.maintenance) {
-                    await simulateLoading(100, "Prověřování"); 
-                    setTimeout(() => {
-                        // ČERVENÉ LOGO
-                        loaderLogo.classList.add('logo-error');
-                        
-                        // ČERVENÝ BAR
-                        progressBar.classList.add('bar-error');
-                        
-                        // JEDNODUCHÝ TEXT
-                        loaderText.innerText = "MAINTENANCE MODE";
-                        loaderText.style.color = "#ff4444";
-                        loaderText.style.textShadow = "0 0 10px #ff4444";
-                    }, 200);
+                    await simulateLoading(100, "Prověřování systému"); 
+                    // Jakmile bar dojede do 100%, okamžitě (bez timeoutu) změníme barvu
+                    
+                    // ČERVENÉ LOGO (Instantní)
+                    loaderLogo.classList.add('logo-error');
+                    
+                    // ČERVENÝ BAR (Instantní)
+                    progressBar.classList.add('bar-error');
+                    
+                    // JEDNODUCHÝ TEXT (Instantní)
+                    loaderText.innerText = "MAINTENANCE MODE";
+                    loaderText.style.color = "#ff4444";
+                    loaderText.style.textShadow = "0 0 10px #ff4444";
                     return; 
                 }
 
@@ -190,10 +191,10 @@
                 document.getElementById('main-content').style.display = 'flex';
 
             } catch (e) {
-                // Pokud selže fetch (chyba v JSONu)
+                // Kritická chyba
                 progressBar.style.width = '100%';
-                loaderLogo.classList.add('logo-error'); // Taky zčervenáme logo
-                progressBar.classList.add('bar-error');
+                loaderLogo.classList.add('logo-error'); // Logo okamžitě zčervená
+                progressBar.classList.add('bar-error'); // Bar okamžitě zčervená
                 loaderText.innerText = "KRITICKÁ CHYBA SYSTÉMU";
                 loaderText.style.color = "#ff4444";
             }
