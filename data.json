@@ -5,29 +5,29 @@
   },
   "content": {
     "title": "KotakEngine",
-    "description": " "
+    "description": "Evidence stavu projektů a splněných úkolů."
   },
   "table": {
     "columns": ["Jména", "Vybráno", "Splněno"],
     "rows": [
-      ["Blažek", "0"],
-      ["Bláha", "0"],
-      ["Bobek", "0"],
-      ["Daněk", "0"],
-      ["Dolasiňský", "0"],
-      ["Grošek", "0"],
-      ["Haška", "0"],
-      ["Kotoul", "0"],
-      ["Lang", "0"],
-      ["Látal", "0"],
-      ["Olšovský", "0"],
-      ["Repa", "0"],
-      ["Saic", "0"],
-      ["Stejskal", "0"],
-      ["Svoboda", "0"],
-      ["Šedrla", "0"],
-      ["Všetička", "0"],
-      ["Yakovcenko", "0"],
+      ["Blažek", "0", "NE"],
+      ["Bláha", "0", "NE"],
+      ["Bobek", "0", "NE"],
+      ["Daněk", "0", "NE"],
+      ["Dolasiňský", "0", "NE"],
+      ["Grošek", "0", "NE"],
+      ["Haška", "0", "NE"],
+      ["Kotoul", "0", "NE"],
+      ["Lang", "0", "NE"],
+      ["Látal", "0", "NE"],
+      ["Olšovský", "0", "NE"],
+      ["Repa", "0", "NE"],
+      ["Saic", "0", "NE"],
+      ["Stejskal", "0", "NE"],
+      ["Svoboda", "0", "NE"],
+      ["Šedrla", "0", "NE"],
+      ["Všetička", "0", "NE"],
+      ["Yakovcenko", "0", "NE"]
     ]
   }
 }
