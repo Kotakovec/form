@@ -10,9 +10,9 @@
   "table": {
     "columns": ["Jména", "Vybráno"],
     "rows": [
-      ["1", "Bin-Enc", "Aktivní"],
-      ["2", "Browser", "Beta"],
-      ["3", "System", "Online"]
+      ["1", "Bin-Enc"],
+      ["2", "Browser"],
+      ["3", "System"]
     ]
   }
 }
