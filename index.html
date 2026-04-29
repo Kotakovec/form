@@ -29,7 +29,9 @@
         #loader-logo { 
             max-width: 150px; height: auto; 
             margin-top: auto; margin-bottom: auto; 
-            /* transition ODSTRANĚNA pro okamžitou změnu */
+            /* Smooth rozsvícení filtru za 0.5s */
+            transition: filter 0.5s ease-in-out; 
+            filter: brightness(1); /* Základní stav */
         }
 
         #loader-text { 
@@ -45,21 +47,20 @@
         #progress-bar { 
             height: 100%; width: 0%; background: #00c853; 
             box-shadow: 0 0 10px #00c853; 
-            transition: width 0.15s ease-out; /* Ponecháme jen pro plynulý růst baru */
+            transition: width 0.15s ease-out; 
         }
 
-        /* --- STYLY PRO CHYBU NEBO ÚDRŽBU (Instantní) --- */
+        /* --- MAINTENANCE / ERROR STYLY --- */
         
-        /* Okamžité červené logo bez přechodů */
         .logo-error {
-            filter: grayscale(1) brightness(0.7) sepia(1) saturate(5000%) hue-rotate(330deg) drop-shadow(0 0 15px #ff4444) !important;
+            /* Odbarvení + Silné zčervenání + Zvýšený jas (rozsvícení) */
+            filter: grayscale(1) brightness(1.5) sepia(1) saturate(5000%) hue-rotate(330deg) drop-shadow(0 0 20px #ff4444) !important;
         }
 
-        /* Okamžitý červený progress bar */
         .bar-error {
             background: #ff4444 !important;
             box-shadow: 0 0 15px #ff4444 !important;
-            transition: none !important; /* Zrušíme plynulou změnu barvy */
+            transition: background 0.5s ease-in-out !important;
         }
 
         .container { 
@@ -136,18 +137,14 @@
                 if (!response.ok) throw new Error();
                 const data = await response.json();
 
-                // 1. KONTROLA ÚDRŽBY (MAINTENANCE)
+                // MAINTENANCE CHECK
                 if (data.settings.maintenance) {
                     await simulateLoading(100, "Prověřování systému"); 
-                    // Jakmile bar dojede do 100%, okamžitě (bez timeoutu) změníme barvu
                     
-                    // ČERVENÉ LOGO (Instantní)
+                    // Přidání chybových tříd (spustí CSS transition)
                     loaderLogo.classList.add('logo-error');
-                    
-                    // ČERVENÝ BAR (Instantní)
                     progressBar.classList.add('bar-error');
                     
-                    // JEDNODUCHÝ TEXT (Instantní)
                     loaderText.innerText = "MAINTENANCE MODE";
                     loaderText.style.color = "#ff4444";
                     loaderText.style.textShadow = "0 0 10px #ff4444";
@@ -156,7 +153,7 @@
 
                 await simulateLoading(100);
 
-                // Zobrazení webu (pokud maintenance: false)
+                // DATA RENDER (pokud není maintenance)
                 if (data.settings.showText && data.content.title.trim() !== "") {
                     document.getElementById('text-section').style.display = 'block';
                     document.getElementById('table-title').innerText = data.content.title;
@@ -191,10 +188,9 @@
                 document.getElementById('main-content').style.display = 'flex';
 
             } catch (e) {
-                // Kritická chyba
                 progressBar.style.width = '100%';
-                loaderLogo.classList.add('logo-error'); // Logo okamžitě zčervená
-                progressBar.classList.add('bar-error'); // Bar okamžitě zčervená
+                loaderLogo.classList.add('logo-error'); 
+                progressBar.classList.add('bar-error');
                 loaderText.innerText = "KRITICKÁ CHYBA SYSTÉMU";
                 loaderText.style.color = "#ff4444";
             }
