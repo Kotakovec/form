@@ -1,9 +1,18 @@
 {
-  "title": "Kotak Form - Přehled",
-  "columns": ["ID", "Název", "Status", "Poznámka"],
-  "rows": [
-    ["1", "Projekt Alfa", "Hotovo", "Vše ok"],
-    ["2", "KotakEngine", "V procesu", "Šifrování hotovo"],
-    ["3", "Testovací řádek", "Čeká", "Uprav mě ve VS Code"]
-  ]
+  "settings": {
+    "showText": true,
+    "showTable": true
+  },
+  "content": {
+    "title": "KotakEngine - Hlavní Panel",
+    "description": "Vítejte v zabezpečeném rozhraní KotakEngine. Zde naleznete aktuální data z binárních souborů."
+  },
+  "table": {
+    "columns": ["ID", "Název", "Status", "Poznámka"],
+    "rows": [
+      ["1", "Bin-Enc", "Aktivní", "Šifrování OK"],
+      ["2", "Browser", "Beta", "V1.0.4"],
+      ["3", "System", "Online", "Bez chyb"]
+    ]
+  }
 }
