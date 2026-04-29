@@ -4,15 +4,15 @@
     "showTable": true
   },
   "content": {
-    "title": "KotakEngine - Hlavní Panel",
-    "description": "Vítejte v zabezpečeném rozhraní KotakEngine. Zde naleznete aktuální data z binárních souborů."
+    "title": "KotakEngine",
+    "description": " "
   },
   "table": {
-    "columns": ["ID", "Název", "Status", "Poznámka"],
+    "columns": ["Jména", "Vybráno"],
     "rows": [
       ["1", "Bin-Enc", "Aktivní", "Šifrování OK"],
-      ["2", "Browser", "Beta", "V1.0.4"],
-      ["3", "System", "Online", "Bez chyb"]
+      ["2", "Browser", "Beta"],
+      ["3", "System", "Online"]
     ]
   }
 }
