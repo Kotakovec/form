@@ -1,0 +1,9 @@
+{
+  "title": "Kotak Form - Přehled",
+  "columns": ["ID", "Název", "Status", "Poznámka"],
+  "rows": [
+    ["1", "Projekt Alfa", "Hotovo", "Vše ok"],
+    ["2", "KotakEngine", "V procesu", "Šifrování hotovo"],
+    ["3", "Testovací řádek", "Čeká", "Uprav mě ve VS Code"]
+  ]
+}
