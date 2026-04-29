@@ -9,15 +9,11 @@
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
             background: #0a0a0a; 
             color: white; 
-            margin: 0; 
-            padding: 0;
-            height: 100vh; 
-            width: 100vw;
+            margin: 0; padding: 0;
+            height: 100vh; width: 100vw;
             overflow: hidden; 
-            display: flex;
-            flex-direction: column;
-            align-items: center; 
-            justify-content: center; 
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; 
         }
 
         #loader-overlay {
@@ -29,14 +25,15 @@
         #loader-logo { 
             max-width: 150px; height: auto; 
             margin-top: auto; margin-bottom: auto; 
-            /* Smooth rozsvícení filtru za 0.5s */
-            transition: filter 0.5s ease-in-out; 
-            filter: brightness(1); /* Základní stav */
+            /* Plynulý přechod všech efektů za 0.7 sekundy */
+            transition: filter 0.7s ease-in-out, transform 0.7s ease-in-out;
+            filter: brightness(1) grayscale(0);
         }
 
         #loader-text { 
             font-size: 1.1rem; color: #00c853; margin-bottom: 15px; 
             text-shadow: 0 0 5px #00c853; text-align: center;
+            transition: all 0.5s ease;
         }
 
         .progress-container { 
@@ -50,39 +47,30 @@
             transition: width 0.15s ease-out; 
         }
 
-        /* --- MAINTENANCE / ERROR STYLY --- */
+        /* --- STAV ÚDRŽBY (SYTĚ ČERVENÁ) --- */
         
-        .logo-error {
-            /* Odbarvení + Silné zčervenání + Zvýšený jas (rozsvícení) */
-            filter: grayscale(1) brightness(1.5) sepia(1) saturate(5000%) hue-rotate(330deg) drop-shadow(0 0 20px #ff4444) !important;
+        .logo-maintenance {
+            /* Nejdřív grayscale, pak sepia pro barvitelný základ, pak sytě červená */
+            filter: grayscale(100%) sepia(100%) saturate(10000%) hue-rotate(320deg) brightness(1.2) drop-shadow(0 0 20px #ff0000) !important;
+            transform: scale(1.05); /* Lehké zvětšení pro efekt "roznutí" */
         }
 
-        .bar-error {
-            background: #ff4444 !important;
-            box-shadow: 0 0 15px #ff4444 !important;
+        .bar-maintenance {
+            background: #ff0000 !important;
+            box-shadow: 0 0 15px #ff0000 !important;
             transition: background 0.5s ease-in-out !important;
         }
 
-        .container { 
-            width: 95%; max-width: 500px; display: none; 
-            flex-direction: column; align-items: center; text-align: center;
-            padding: 10px 0;
-        }
-
+        /* Zbytek tabulky... */
+        .container { width: 95%; max-width: 500px; display: none; flex-direction: column; align-items: center; text-align: center; padding: 10px 0; }
         #text-section { margin-bottom: 10px; width: 100%; }
         h1 { color: #00c853; display: inline-block; font-size: 1.4rem; margin: 10px 0; border: none; }
         #table-desc { color: #888; margin-top: 5px; font-size: 0.85rem; }
-
-        #table-section { 
-            width: 100%; max-height: 75vh; overflow-y: auto; 
-            border: 1px solid #333; border-radius: 4px;
-        }
-        
+        #table-section { width: 100%; max-height: 75vh; overflow-y: auto; border: 1px solid #333; border-radius: 4px; }
         table { width: 100%; border-collapse: collapse; background: #111; }
         th, td { border: 1px solid #222; padding: 6px 8px; text-align: center; font-size: 0.85rem; }
         th { background: #00c853; color: black; font-size: 0.8rem; position: sticky; top: 0; z-index: 10; }
         tr:nth-child(even) { background: #161616; }
-        
         .status-ano { color: #00ff00; font-weight: bold; }
         .status-ne { color: #ff4444; font-weight: bold; }
     </style>
@@ -117,7 +105,7 @@
             return new Promise((resolve) => {
                 let progress = parseInt(progressBar.style.width) || 0;
                 const interval = setInterval(() => {
-                    progress += Math.floor(Math.random() * 10) + 5;
+                    progress += Math.floor(Math.random() * 8) + 4;
                     if (progress >= target) {
                         progress = target;
                         clearInterval(interval);
@@ -125,7 +113,7 @@
                     }
                     progressBar.style.width = progress + '%';
                     loaderText.innerText = `${textPrefix} [${progress}]%`;
-                }, 70);
+                }, 80);
             });
         }
 
@@ -137,23 +125,25 @@
                 if (!response.ok) throw new Error();
                 const data = await response.json();
 
-                // MAINTENANCE CHECK
+                // MAINTENANCE
                 if (data.settings.maintenance) {
                     await simulateLoading(100, "Prověřování systému"); 
                     
-                    // Přidání chybových tříd (spustí CSS transition)
-                    loaderLogo.classList.add('logo-error');
-                    progressBar.classList.add('bar-error');
-                    
-                    loaderText.innerText = "MAINTENANCE MODE";
-                    loaderText.style.color = "#ff4444";
-                    loaderText.style.textShadow = "0 0 10px #ff4444";
+                    // Malá pauza před rozsvícením pro efekt
+                    setTimeout(() => {
+                        loaderLogo.classList.add('logo-maintenance');
+                        progressBar.classList.add('bar-maintenance');
+                        
+                        loaderText.innerText = "MAINTENANCE MODE";
+                        loaderText.style.color = "#ff0000";
+                        loaderText.style.textShadow = "0 0 10px #ff0000";
+                    }, 100);
                     return; 
                 }
 
                 await simulateLoading(100);
 
-                // DATA RENDER (pokud není maintenance)
+                // DATA RENDER
                 if (data.settings.showText && data.content.title.trim() !== "") {
                     document.getElementById('text-section').style.display = 'block';
                     document.getElementById('table-title').innerText = data.content.title;
@@ -164,8 +154,7 @@
                     document.getElementById('table-section').style.display = 'block';
                     const head = document.getElementById('table-head');
                     data.table.columns.forEach(c => {
-                        const th = document.createElement('th');
-                        th.innerText = c;
+                        const th = document.createElement('th'); th.innerText = c;
                         head.appendChild(th);
                     });
 
@@ -189,10 +178,10 @@
 
             } catch (e) {
                 progressBar.style.width = '100%';
-                loaderLogo.classList.add('logo-error'); 
-                progressBar.classList.add('bar-error');
-                loaderText.innerText = "KRITICKÁ CHYBA SYSTÉMU";
-                loaderText.style.color = "#ff4444";
+                loaderLogo.classList.add('logo-maintenance'); 
+                progressBar.classList.add('bar-maintenance');
+                loaderText.innerText = "CHYBA SYSTÉMU";
+                loaderText.style.color = "#ff0000";
             }
         }
         window.onload = init;
