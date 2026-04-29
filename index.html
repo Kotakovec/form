@@ -5,71 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kotak Table Viewer</title>
     <style>
-        /* Základní reset a temný styl */
+        /* Celkové nastavení stránky - bez scrollu */
         body { 
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
             background: #0a0a0a; 
             color: white; 
             margin: 0; 
             padding: 0;
-            display: flex; 
+            height: 100vh; 
+            width: 100vw;
+            overflow: hidden; /* Zákaz scrollování */
+            display: flex;
             flex-direction: column;
             align-items: center; 
             justify-content: center; 
-            min-height: 100vh; /* Zajistí vycentrování na střed výšky obrazovky */
-            overflow-x: hidden;
         }
 
-        /* Načítací obrazovka přes celou plochu */
-        #loader-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #0a0a0a; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; z-index: 1000; 
+        /* Načítací obrazovka (Overlay) */
+        #loader-overlay {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: #0a0a0a; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            z-index: 1000;
+            padding: 40px 0;
+            box-sizing: border-box;
         }
-        #loader-logo { max-width: 150px; height: auto; margin-bottom: 30px; }
+
+        /* Logo je ve svislém středu */
+        #loader-logo { 
+            max-width: 180px; 
+            height: auto; 
+            margin-top: auto;   /* Odtlačí logo od horního okraje */
+            margin-bottom: auto; /* Odtlačí text a bar k dolnímu okraji */
+        }
+
+        /* Text a Progress Bar dole */
         #loader-text { 
-    font-size: 1.2rem; 
-    color: #00c853; 
-    margin-bottom: 15px; 
-    text-shadow: 0 0 5px #00c853; 
-    text-align: center; /* Tímto vycentruješ samotná slova */
-    width: 100%;       /* Roztáhne text na celou šířku, aby střed fungoval */
-}
-        #loader-text { font-size: 1.2rem; color: #00c853; margin-bottom: 15px; text-shadow: 0 0 5px #00c853; }
-        .progress-container { width: 300px; height: 10px; background: #222; border-radius: 5px; overflow: hidden; border: 1px solid #333; }
-        #progress-bar { height: 100%; width: 0%; background: #00c853; box-shadow: 0 0 10px #00c853; transition: width 0.1s ease-out; }
+            font-size: 1.1rem; 
+            color: #00c853; 
+            margin-bottom: 15px; 
+            text-shadow: 0 0 5px #00c853; 
+            text-align: center;
+        }
 
-        /* Hlavní kontejner - vše vycentrované pod sebou */
+        .progress-container { 
+            width: 280px; 
+            height: 8px; 
+            background: #1a1a1a; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            border: 1px solid #333;
+            margin-bottom: 20px; /* Mezera od spodní hrany */
+        }
+
+        #progress-bar { 
+            height: 100%; 
+            width: 0%; 
+            background: #00c853; 
+            box-shadow: 0 0 10px #00c853; 
+            transition: width 0.15s ease-out; 
+        }
+
+        /* Hlavní kontejner s obsahem (po načtení) */
         .container { 
             width: 90%; 
             max-width: 900px; 
-            display: none; 
+            display: none; /* Skryto během načítání */
             flex-direction: column; 
-            align-items: center; /* Vycentrování obsahu horizontálně */
-            text-align: center;  /* Vycentrování textu */
-            padding: 40px 0;
+            align-items: center;
+            text-align: center;
         }
-        
-        /* Sekce s textem */
-        #text-section { margin-bottom: 40px; width: 100%; }
-        h1 { color: #00c853; margin-bottom: 15px; font-size: 2rem; display: inline-block; border-bottom: 2px solid #00c853; padding-bottom: 5px; }
-        #table-desc { color: #ccc; max-width: 600px; margin: 0 auto; line-height: 1.6; }
-        
-        /* Sekce s tabulkou */
-        #table-section { width: 100%; overflow-x: auto; /* Scrollbar pro malé mobily */ }
-        table { width: 100%; border-collapse: collapse; background: #141414; box-shadow: 0 0 25px rgba(0,200,83,0.1); }
-        th, td { border: 1px solid #333; padding: 15px; text-align: center; }
-        th { background: #00c853; color: black; text-transform: uppercase; letter-spacing: 1px; }
-        tr:nth-child(even) { background: #1a1a1a; }
-        tr:hover { background: #222; }
+
+        #text-section { margin-bottom: 30px; }
+        h1 { color: #00c853; border-bottom: 2px solid #00c853; padding-bottom: 5px; display: inline-block; }
+        #table-desc { color: #888; margin-top: 10px; }
+
+        #table-section { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: #111; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: center; }
+        th { background: #00c853; color: black; }
+        tr:nth-child(even) { background: #161616; }
     </style>
 </head>
 <body>
 
     <div id="loader-overlay">
-        <img src="./logo.png" alt="Logo" id="loader-logo">
+        <img src="logo.png" alt="KotakEngine Logo" id="loader-logo">
         <div id="loader-text">KotakEngine - Načítání z databáze [0]%</div>
-        <div class="progress-container"><div id="progress-bar"></div></div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
     </div>
 
     <div class="container" id="main-content">
@@ -87,31 +118,41 @@
     </div>
 
     <script>
+        // Funkce pro efekt progress baru (cca 1s)
         function simulateLoading() {
             return new Promise((resolve) => {
                 const progressBar = document.getElementById('progress-bar');
                 const loaderText = document.getElementById('loader-text');
                 let progress = 0;
+
                 const interval = setInterval(() => {
-                    progress += Math.floor(Math.random() * 20) + 10;
+                    progress += Math.floor(Math.random() * 15) + 10;
                     if (progress > 100) progress = 100;
+
                     progressBar.style.width = progress + '%';
                     loaderText.innerText = `KotakEngine - Načítání z databáze [${progress}]%`;
-                    if (progress === 100) { clearInterval(interval); setTimeout(resolve, 200); }
-                }, 150);
+
+                    if (progress === 100) {
+                        clearInterval(interval);
+                        setTimeout(resolve, 300);
+                    }
+                }, 120);
             });
         }
 
-        async function loadData() {
+        // Hlavní logika načítání dat
+        async function init() {
             try {
+                // Spustíme simulaci a fetch dat zároveň
                 const [response] = await Promise.all([
                     fetch('data.json?t=' + Date.now()),
                     simulateLoading()
                 ]);
 
+                if (!response.ok) throw new Error();
                 const data = await response.json();
 
-                // Logika pro Text
+                // 1. Nastavení textu
                 if (data.settings.showText) {
                     document.getElementById('table-title').innerText = data.content.title;
                     document.getElementById('table-desc').innerText = data.content.description;
@@ -119,18 +160,19 @@
                     document.getElementById('text-section').style.display = 'none';
                 }
 
-                // Logika pro Tabulku
+                // 2. Nastavení tabulky
                 if (data.settings.showTable) {
-                    const headRow = document.getElementById('table-head');
-                    data.table.columns.forEach(col => {
+                    const head = document.getElementById('table-head');
+                    data.table.columns.forEach(c => {
                         const th = document.createElement('th');
-                        th.innerText = col;
-                        headRow.appendChild(th);
+                        th.innerText = c;
+                        head.appendChild(th);
                     });
+
                     const body = document.getElementById('table-body');
-                    data.table.rows.forEach(row => {
+                    data.table.rows.forEach(r => {
                         const tr = document.createElement('tr');
-                        row.forEach(cell => {
+                        r.forEach(cell => {
                             const td = document.createElement('td');
                             td.innerText = cell;
                             tr.appendChild(td);
@@ -141,17 +183,21 @@
                     document.getElementById('table-section').style.display = 'none';
                 }
 
-                // Zobrazení všeho najednou
+                // Přepnutí obrazovek
                 document.getElementById('loader-overlay').style.display = 'none';
-                document.getElementById('main-content').style.display = 'flex'; // Používáme flex pro centrování
+                document.getElementById('main-content').style.display = 'flex';
+                
+                // Pokud chceš po načtení povolit scroll (kdyby byla tabulka dlouhá), 
+                // odkomentuj řádek níže:
+                // document.body.style.overflow = 'auto';
 
-            } catch (err) {
-                document.getElementById('loader-text').innerText = "CHYBA NAČÍTÁNÍ DAT";
-                document.getElementById('loader-text').style.color = "red";
+            } catch (e) {
+                document.getElementById('loader-text').innerText = "KRITICKÁ CHYBA DATABÁZE";
+                document.getElementById('loader-text').style.color = "#ff4444";
             }
         }
 
-        window.onload = loadData;
+        window.onload = init;
     </script>
 </body>
 </html>
