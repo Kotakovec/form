@@ -8,7 +8,7 @@
     "description": "Evidence stavu projektů a splněných úkolů."
   },
   "table": {
-    "columns": ["Jména", "Vybráno", "Splněno"],
+    "columns": ["Jména", "Vybráno", "Splněno", "Bank. Převod"],
     "rows": [
       ["Blažek", "0", "NE", "NE"],
       ["Bláha", "0", "NE", "NE"],
