@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kotak Table Viewer</title>
     <style>
-        /* Celkové nastavení stránky - bez scrollu */
+        /* Celkové nastavení stránky */
         body { 
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
             background: #0a0a0a; 
@@ -29,7 +29,7 @@
         }
 
         #loader-logo { 
-            max-width: 180px; height: auto; 
+            max-width: 150px; height: auto; 
             margin-top: auto; margin-bottom: auto; 
         }
 
@@ -39,7 +39,7 @@
         }
 
         .progress-container { 
-            width: 280px; height: 8px; background: #1a1a1a; 
+            width: 250px; height: 6px; background: #1a1a1a; 
             border-radius: 10px; overflow: hidden; border: 1px solid #333; margin-bottom: 20px;
         }
 
@@ -48,40 +48,59 @@
             box-shadow: 0 0 10px #00c853; transition: width 0.15s ease-out; 
         }
 
-        /* Hlavní kontejner s obsahem */
+        /* Hlavní kontejner - KOMPAKTNÍ VERZE */
         .container { 
-            width: 90%; max-width: 900px; display: none; 
-            flex-direction: column; align-items: center; text-align: center;
+            width: 95%; 
+            max-width: 500px; /* Zúžení celého kontejneru */
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            text-align: center;
+            padding: 10px 0;
         }
 
-        #text-section { margin-bottom: 30px; }
-        h1 { color: #00c853; border-bottom: 2px solid #00c853; padding-bottom: 5px; display: inline-block; }
-        #table-desc { color: #888; margin-top: 10px; }
+        #text-section { margin-bottom: 10px; }
+        h1 { color: #00c853; border-bottom: 2px solid #00c853; padding-bottom: 2px; display: inline-block; font-size: 1.4rem; margin: 10px 0; }
+        #table-desc { color: #888; margin-top: 5px; font-size: 0.85rem; }
 
-        #table-section { width: 100%; overflow-x: auto; }
+        /* Tabulka - KOMPAKTNÍ VERZE */
+        #table-section { 
+            width: 100%; 
+            max-height: 70vh; /* Aby se při moc jménech dalo scrollovat jen v tabulce */
+            overflow-y: auto; 
+            border: 1px solid #333;
+        }
+        
         table { width: 100%; border-collapse: collapse; background: #111; }
-        th, td { border: 1px solid #333; padding: 12px; text-align: center; }
-        th { background: #00c853; color: black; }
-        tr:nth-child(even) { background: #161616; }
+        
+        th, td { 
+            border: 1px solid #222; 
+            padding: 5px 8px; /* Výrazné zmenšení vnitřního okraje */
+            text-align: center; 
+            font-size: 0.85rem; /* Menší písmo */
+        }
 
-        /* --- Styly pro ANO / NE --- */
-        .status-ano { 
-            color: #00ff00; /* Jasně zelená */
-            font-weight: bold;
-            text-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+        th { 
+            background: #00c853; 
+            color: black; 
+            font-size: 0.8rem; 
+            position: sticky; top: 0; /* Hlavička zůstane nahoře při scrollu */
+            z-index: 10;
         }
-        .status-ne { 
-            color: #ff4444; /* Jasně červená */
-            font-weight: bold;
-            text-shadow: 0 0 8px rgba(255, 68, 68, 0.4);
-        }
+
+        tr:nth-child(even) { background: #161616; }
+        tr:hover { background: #1d1d1d; }
+
+        /* Statusy */
+        .status-ano { color: #00ff00; font-weight: bold; text-shadow: 0 0 5px rgba(0, 255, 0, 0.3); }
+        .status-ne { color: #ff4444; font-weight: bold; text-shadow: 0 0 5px rgba(255, 68, 68, 0.3); }
     </style>
 </head>
 <body>
 
     <div id="loader-overlay">
-        <img src="logo.png" alt="KotakEngine Logo" id="loader-logo">
-        <div id="loader-text">KotakEngine - Načítání z databáze [0]%</div>
+        <img src="logo.png" alt="Logo" id="loader-logo">
+        <div id="loader-text">KotakEngine - Načítání [0]%</div>
         <div class="progress-container"><div id="progress-bar"></div></div>
     </div>
 
@@ -106,12 +125,12 @@
                 const loaderText = document.getElementById('loader-text');
                 let progress = 0;
                 const interval = setInterval(() => {
-                    progress += Math.floor(Math.random() * 15) + 10;
+                    progress += Math.floor(Math.random() * 20) + 10;
                     if (progress > 100) progress = 100;
                     progressBar.style.width = progress + '%';
-                    loaderText.innerText = `KotakEngine - Načítání z databáze [${progress}]%`;
-                    if (progress === 100) { clearInterval(interval); setTimeout(resolve, 300); }
-                }, 120);
+                    loaderText.innerText = `KotakEngine - Načítání [${progress}]%`;
+                    if (progress === 100) { clearInterval(interval); setTimeout(resolve, 200); }
+                }, 100);
             });
         }
 
@@ -146,32 +165,23 @@
                         r.forEach(cellText => {
                             const td = document.createElement('td');
                             td.innerText = cellText;
-
-                            // LOGIKA PRO BARVY (ANO / NE)
                             const cleanText = cellText.toString().trim().toUpperCase();
-                            if (cleanText === "ANO") {
-                                td.classList.add('status-ano');
-                            } else if (cleanText === "NE") {
-                                td.classList.add('status-ne');
-                            }
-
+                            if (cleanText === "ANO") td.classList.add('status-ano');
+                            else if (cleanText === "NE") td.classList.add('status-ne');
                             tr.appendChild(td);
                         });
                         body.appendChild(tr);
                     });
-                } else {
-                    document.getElementById('table-section').style.display = 'none';
                 }
 
                 document.getElementById('loader-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'flex';
 
             } catch (e) {
-                document.getElementById('loader-text').innerText = "KRITICKÁ CHYBA DATABÁZE";
+                document.getElementById('loader-text').innerText = "CHYBA DATA.JSON";
                 document.getElementById('loader-text').style.color = "#ff4444";
             }
         }
-
         window.onload = init;
     </script>
 </body>
