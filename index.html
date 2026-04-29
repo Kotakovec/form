@@ -49,7 +49,8 @@
         /* Třída pro červený bar při údržbě nebo chybě */
         .bar-error {
             background: #ff4444 !important;
-            box-shadow: 0 0 10px #ff4444 !important;
+            box-shadow: 0 0 15px #ff4444 !important;
+            transition: background 0.3s ease-in-out !important;
         }
 
         .container { 
@@ -101,45 +102,47 @@
         const progressBar = document.getElementById('progress-bar');
         const loaderText = document.getElementById('loader-text');
 
-        function simulateLoading(target) {
+        function simulateLoading(target, textPrefix = "KotakEngine - Načítání") {
             return new Promise((resolve) => {
-                let progress = 0;
+                let progress = parseInt(progressBar.style.width) || 0;
                 const interval = setInterval(() => {
-                    progress += Math.floor(Math.random() * 15) + 5;
+                    progress += Math.floor(Math.random() * 10) + 5;
                     if (progress >= target) {
                         progress = target;
                         clearInterval(interval);
                         resolve();
                     }
                     progressBar.style.width = progress + '%';
-                    loaderText.innerText = `KotakEngine - Načítání [${progress}]%`;
-                }, 80);
+                    loaderText.innerText = `${textPrefix} [${progress}]%`;
+                }, 70);
             });
         }
 
         async function init() {
             try {
-                // 1. Nejdřív jen lehce načteme progress
-                await simulateLoading(30);
+                // 1. Zahájení načítání
+                await simulateLoading(20);
 
-                // 2. Fetch dat
+                // 2. Fetch dat z JSONu
                 const response = await fetch('data.json?t=' + Date.now());
                 if (!response.ok) throw new Error();
                 const data = await response.json();
 
-                // 3. KONTROLA MAINTENANCE
+                // 3. Kontrola režimu údržby (Maintenance)
                 if (data.settings.maintenance) {
-                    await simulateLoading(65); // Zastavíme to v půlce
-                    progressBar.classList.add('bar-error');
-                    loaderText.innerText = "MAINTENANCE MODE - DOČASNĚ VYPNUTO";
-                    loaderText.style.color = "#ff4444";
-                    return; // Ukončíme funkci, aby se web nenačetl
+                    await simulateLoading(100, "Prověřování systému"); // Dojede až do konce
+                    setTimeout(() => {
+                        progressBar.classList.add('bar-error');
+                        loaderText.innerText = "MAINTENANCE MODE - SYSTÉM DOČASNĚ ODPOJEN";
+                        loaderText.style.color = "#ff4444";
+                    }, 200);
+                    return; 
                 }
 
-                // 4. Dojetí loading baru pokud není maintenance
+                // 4. Dojetí do 100 % pokud je vše v pořádku
                 await simulateLoading(100);
 
-                // 5. Vykreslení dat (pokud maintenance: false)
+                // 5. Vykreslení obsahu
                 if (data.settings.showText && data.content.title.trim() !== "") {
                     document.getElementById('text-section').style.display = 'block';
                     document.getElementById('table-title').innerText = data.content.title;
@@ -170,12 +173,15 @@
                     });
                 }
 
+                // Zobrazení webu
                 document.getElementById('loader-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'flex';
 
             } catch (e) {
+                // Pokud selže fetch (chyba v JSONu)
+                progressBar.style.width = '100%';
                 progressBar.classList.add('bar-error');
-                loaderText.innerText = "KRITICKÁ CHYBA DATABÁZE";
+                loaderText.innerText = "KRITICKÁ CHYBA KONFIGURACE";
                 loaderText.style.color = "#ff4444";
             }
         }
