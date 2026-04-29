@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotak Table Viewer</title>
+    <style>
+        /* Základní styly pro tmavý režim */
+        body { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; background: #0a0a0a; color: white; margin: 0; display: flex; justify-content: center; height: 100vh; align-items: center; overflow: hidden; }
+        
+        /* Styly pro tabulku (přesunuty do kontejneru pro schování) */
+        .container { width: 100%; max-width: 900px; padding: 20px; display: none; /* Schováno při načítání */ }
+        h1 { border-left: 4px solid #00c853; padding-left: 15px; color: #00c853; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #141414; box-shadow: 0 0 15px rgba(0,200,83,0.1); }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
+        th { background: #00c853; color: black; text-transform: uppercase; letter-spacing: 1px; }
+        tr:nth-child(even) { background: #1a1a1a; }
+        tr:hover { background: #222; }
+
+        /* Styly pro načítací obrazovku (Overlay) */
+        #loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0a0a0a; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        
+        /* Styl pro logo */
+        #loader-logo {
+            max-width: 150px; /* Upravit velikost loga podle potřeby */
+            height: auto;
+            margin-bottom: 30px;
+            /* Volitelně: Přidat jemnou záři, pokud má logo průhledné pozadí */
+            /* filter: drop-shadow(0 0 10px rgba(0,200,83,0.5)); */
+        }
+
+        #loader-text { font-size: 1.2rem; color: #00c853; margin-bottom: 15px; text-shadow: 0 0 5px #00c853; text-align: center; }
+        
+        /* Kontejner progress baru */
+        .progress-container { width: 300px; height: 10px; background: #222; border-radius: 5px; overflow: hidden; border: 1px solid #333; }
+        
+        /* Samotný bar */
+        #progress-bar { height: 100%; width: 0%; background: #00c853; box-shadow: 0 0 10px #00c853; transition: width 0.1s ease-out; }
+    </style>
+</head>
+<body>
+
+    <div id="loader-overlay">
+        <img src="logo.png" alt="KotakEngine Logo" id="loader-logo">
+        
+        <div id="loader-text">KotakEngine - Načítání z databáze [0]%</div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="container" id="main-content">
+        <h1 id="table-title">KotakForm</h1>
+        <table id="data-table">
+            <thead><tr id="table-head"></tr></thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Funkce pro simulaci progress baru
+        function simulateLoading() {
+            return new Promise((resolve) => {
+                const progressBar = document.getElementById('progress-bar');
+                const loaderText = document.getElementById('loader-text');
+                let progress = 0;
+
+                const interval = setInterval(() => {
+                    // Náhodné přičtení procent pro realističtější efekt
+                    let increment = Math.floor(Math.random() * 20) + 10; 
+                    progress += increment;
+
+                    if (progress > 100) progress = 100;
+
+                    // Aktualizace DOMu
+                    progressBar.style.width = progress + '%';
+                    loaderText.innerText = `KotakEngine - Načítání z databáze [${progress}]%`;
+
+                    if (progress === 100) {
+                        clearInterval(interval);
+                        // Po dosažení 100 % krátká pauza a pak dokončení
+                        setTimeout(() => resolve(), 200);
+                    }
+                }, 150); // Rychlost aktualizace (cca 1 sekunda celkem)
+            });
+        }
+
+        // Funkce pro načtení dat
+        async function loadTable() {
+            try {
+                // Spustíme obě věci najednou: načítání dat a simulaci progress baru
+                const [response] = await Promise.all([
+                    fetch('data.json?t=' + Date.now()),
+                    simulateLoading() // Čekáme na dokončení progress baru (cca 1s)
+                ]);
+
+                if (!response.ok) throw new Error('Nepodařilo se načíst data');
+                const data = await response.json();
+
+                // Vygenerování dat do tabulky
+                document.getElementById('table-title').innerText = data.title;
+                const headRow = document.getElementById('table-head');
+                data.columns.forEach(col => {
+                    const th = document.createElement('th');
+                    th.innerText = col;
+                    headRow.appendChild(th);
+                });
+                const body = document.getElementById('table-body');
+                data.rows.forEach(row => {
+                    const tr = document.createElement('tr');
+                    row.forEach(cell => {
+                        const td = document.createElement('td');
+                        td.innerText = cell;
+                        tr.appendChild(td);
+                    });
+                    body.appendChild(tr);
+                });
+
+                // --- SCHOVÁNÍ NAČÍTÁNÍ A ZOBRAZENÍ TABULKY ---
+                document.getElementById('loader-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                // Povolit scrollbar po načtení
+                document.body.style.overflow = 'auto';
+
+            } catch (err) {
+                console.error("Chyba:", err);
+                document.getElementById('loader-text').innerText = "CHYBA DATABÁZE";
+                document.getElementById('loader-text').style.color = "red";
+                document.getElementById('progress-bar').style.background = "red";
+            }
+        }
+
+        // Spustíme hlavní funkci po načtení stránky
+        window.onload = loadTable;
+    </script>
+</body>
+</html>
